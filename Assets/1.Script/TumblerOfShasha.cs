@@ -13,7 +13,8 @@ public class TumblerOfShasha : MonoBehaviour
 {
 
     //[Header("확률 범위 설정")]
-    private float currentChance = 0.0f; // 시작 확률 및 현재 확률
+
+    [HideInInspector] public float currentChance = 0.0f; // 시작 확률 및 현재 확률, public으로 해서 UI에 사용하기
 
     [Header("확률 범위 설정 n%")]
     [SerializeField] private float addChanceMin = 5f; // 5라고 쓰면 추가될 최소 확률(+5%)라는 의미
@@ -48,7 +49,7 @@ public class TumblerOfShasha : MonoBehaviour
             
             // 돌발행동이 발생하지 않는다면 확률을 높여준다.
             float added = Random.Range(addMin, addMax);
-            Debug.Log("증가된 확률" + (added * 100f).ToString("F1") + "%");
+            //Debug.Log("증가된 확률" + (added * 100f).ToString("F1") + "%");
             currentChance += added; // 돌발행동할 확률을 증가시킨다.
 
             // 확률이 최대 100%(1.0)이 넘지 않도록 안전장치를 걸어준다.
