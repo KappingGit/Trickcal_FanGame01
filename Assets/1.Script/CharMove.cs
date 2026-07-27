@@ -160,7 +160,7 @@ public class CharMove : MonoBehaviour
                     // 디버그로 힘이 어떻게 변했는지 확인해보세요!
                     if (multiplier !=1.0f) //1.0f인 이유는 텀블러 스크립트에서 1.0f이 출력된다는 것은 힘 배율이 변화없다는 뜻이다. 
                     {
-                        Debug.Log("최종 적용된 점프 힘 배율: " + multiplier + "배");
+                        Debug.Log("최종 적용된 점프 힘 배율: " + (multiplier).ToString("F1") + "배");
                     }
                     
                 }
@@ -171,6 +171,8 @@ public class CharMove : MonoBehaviour
                 Vector2 finalJumpForce = new Vector2(force_X, force_Y);
 
                 charRb.AddForce(finalJumpForce, ForceMode2D.Impulse);
+
+                //Debug.Log("최종 점프 힘: " + finalJumpForce);
 
                 isGrounded = false;
 
