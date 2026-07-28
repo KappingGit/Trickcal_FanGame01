@@ -38,7 +38,9 @@ public class CharMove : MonoBehaviour
     [Header("박스 캐스트 설정")]
     // 박스 캐스트를 위한 변수
     [SerializeField] private Vector2 boxSize = new Vector2(0.8f, 0.1f); // 가로 세로 크기
-    [SerializeField] private float boxCastDistance = 0.1f; // 박스 캐스트가 쏘아질 거리
+
+    [Tooltip("지면 탐지용 Box콜라이더 Y값을 참고에서 입력")]
+    [SerializeField] private float boxCastDistance = 0.5f; // 박스 캐스트가 쏘아질 거리
 
     [Header("TumblerOfShasha 스크립트")]
     //TumblerOfShasha 스크립트 변수
@@ -158,7 +160,7 @@ public class CharMove : MonoBehaviour
                     force_X *= multiplier;
 
                     // 디버그로 힘이 어떻게 변했는지 확인해보세요!
-                    if (multiplier !=1.0f) //1.0f인 이유는 텀블러 스크립트에서 1.0f이 출력된다는 것은 힘 배율이 변화없다는 뜻이다. 
+                    if (multiplier !=1.0f) // 1.0f인 이유는 텀블러 스크립트에서 1.0f이 출력된다는 것은 힘 배율이 변화없다는 뜻이다. 
                     {
                         Debug.Log("최종 적용된 점프 힘 배율: " + (multiplier).ToString("F1") + "배");
                     }
@@ -170,9 +172,12 @@ public class CharMove : MonoBehaviour
                 // 리지드바디에게 (방향 * 모은 힘) 만큼의 속도를 순간적으로 팍 밀어 넣어 날린다
                 Vector2 finalJumpForce = new Vector2(force_X, force_Y);
 
+                // [핵심 해결 코드] 점프 직전에 현재 남아있는 Y축(상하) 물리 속도를 완전히 0으로 소거!
+                charRb.velocity = new Vector2(charRb.velocity.x, 0f);
+
                 charRb.AddForce(finalJumpForce, ForceMode2D.Impulse);
 
-                //Debug.Log("최종 점프 힘: " + finalJumpForce);
+                Debug.Log("최종 점프 힘: " + finalJumpForce);
 
                 isGrounded = false;
 
