@@ -16,7 +16,7 @@ public class UI_Script : MonoBehaviour
     private void Awake()
     {
         Detect();
-        tumblerGaugeImage.fillAmount = tumblerScript.currentChance;
+        tumblerGaugeImage.fillAmount = tumblerScript.currentGauge;
     }
 
     private void Update()
@@ -52,12 +52,12 @@ public class UI_Script : MonoBehaviour
         // 키워드 : Mathf.MoveTowards(현재값, 목표값, 속도)
         tumblerGaugeImage.fillAmount = Mathf.MoveTowards(
                 tumblerGaugeImage.fillAmount,   // 출발점 (현재 게이지 위치)
-                tumblerScript.currentChance,                // 도착점 (텀블러의 실제 확률)
+                tumblerScript.currentGauge,                // 도착점 (텀블러의 실제 확률)
                 tumblerGaugeFillSpeed * Time.deltaTime   // 속도
             );
 
         // (선택) 확률에 따라 게이지 색상 변경 연출
-        tumblerGaugeImage.color = gaugeColorGradient.Evaluate(tumblerScript.currentChance);
+        tumblerGaugeImage.color = gaugeColorGradient.Evaluate(tumblerScript.currentGauge);
 
         // 텀블러 [돌발행동] 확률
         //tumblerChanceText.text = (tumblerScript.currentChance * 100f).ToString("F1") + "%";

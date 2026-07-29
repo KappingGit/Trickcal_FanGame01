@@ -3567,7 +3567,7 @@ MonoBehaviour:
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
   tumblerChanceText: {fileID: 960280066}
-  tumblerGaugeFillSpeed: 0.1
+  tumblerGaugeFillSpeed: 0.5
 --- !u!1001 &1136478596
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7111,9 +7111,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83c6f64413aa0724bbd710a56c6b56d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentChance: 0
-  addChanceMin: 2
-  addChanceMax: 5
+  currentGauge: 0
+  addGaugeMin: 2
+  addGaugeMax: 11
   minOutburstMult: 1
   maxOutburstMult: 2
 --- !u!70 &1678379328

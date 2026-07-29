@@ -108,7 +108,7 @@ public class CharMove : MonoBehaviour
                 //Debug.Log("점프 게이지 모으는 중 " + jumpForce);
             }
 
-            if (Input.GetKeyUp(KeyCode.Space)) // 키를 땐 순간
+            if (Input.GetKeyUp(KeyCode.Space)) // 키를 땐 순간(점프 순간)
             {
                 #region (사용안함) 단순 normalized 사용기법 [문제점: 좌우 점프와 제자리 점프의 힘이 다르게 작용]
 
@@ -143,7 +143,6 @@ public class CharMove : MonoBehaviour
                 //charRb.AddForce(jumpDirection * finalForce, ForceMode2D.Impulse);
                 #endregion
 
-                
 
                 // 점프의 힘 보정해주는 변수(좌우 점프와 제자리 점프 보정)
                 //방향 벡터를 하나로 묶어 정규화(.normalized)하지 않고, 힘을 각각 계산
@@ -152,6 +151,8 @@ public class CharMove : MonoBehaviour
                 // 좌우 힘은 방향(char_X)에 힘을 곱하되, 밸런스를 위해 가로 계수(0.7f)를 곱해 조율
                 float force_X = char_X * jumpForce * 0.7f;
 
+                //-----------------------------------------------
+                //돌발행동을 한다면...
                 // 텀블러 스크립트에서 가져온다.
                 if (tumblerScript != null) // 텀블러 스크립트가 제대로 연결되어 있다면 배율을 가져와서 곱한다.
                 {
@@ -160,13 +161,13 @@ public class CharMove : MonoBehaviour
                     force_X *= multiplier;
 
                     // 디버그로 힘이 어떻게 변했는지 확인해보세요!
-                    if (multiplier !=1.0f) // 1.0f인 이유는 텀블러 스크립트에서 1.0f이 출력된다는 것은 힘 배율이 변화없다는 뜻이다. 
-                    {
-                        Debug.Log("최종 적용된 점프 힘 배율: " + (multiplier).ToString("F1") + "배");
-                    }
+                    //if (multiplier !=1.0f) // 1.0f인 이유는 텀블러 스크립트에서 1.0f이 출력된다는 것은 힘 배율이 변화없다는 뜻이다. 
+                    //{
+                    //    Debug.Log("최종 적용된 점프 힘 배율: " + (multiplier).ToString("F1") + "배");
+                    //}
                     
                 }
-
+                //-----------------------------------------------
 
                 // 키워드: ForceMode2D.Impulse (순간적인 충격량 부여)
                 // 리지드바디에게 (방향 * 모은 힘) 만큼의 속도를 순간적으로 팍 밀어 넣어 날린다
@@ -177,7 +178,7 @@ public class CharMove : MonoBehaviour
 
                 charRb.AddForce(finalJumpForce, ForceMode2D.Impulse);
 
-                Debug.Log("최종 점프 힘: " + finalJumpForce);
+                //Debug.Log("최종 점프 힘: " + finalJumpForce);
 
                 isGrounded = false;
 
