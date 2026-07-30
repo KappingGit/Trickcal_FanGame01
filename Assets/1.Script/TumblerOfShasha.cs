@@ -65,7 +65,7 @@ public class TumblerOfShasha : MonoBehaviour
 
         // 변경 : 돌발행동하는 조건이 확률이 아닌 100%가 되었을 때 실행되게 끔 설정하고 100% 되는 순간 작동하게끔 변경
 
-        //이번 점프에서 추가될 게이지를 먼저 계산해서 더한다.
+        // 이번 점프에서 추가될 게이지를 먼저 계산해서 더한다.
         float added = Random.Range(addMin, addMax);
 
         currentGauge += added;

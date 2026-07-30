@@ -12,6 +12,14 @@ public class CharMove : MonoBehaviour
     // [SerializeField] 주의사항: 인스펙터에 있는 데이터 값을 우선 순위로 한다.
 
     private Rigidbody2D charRb;
+    private SpriteRenderer spriteRenderer;
+
+    //---------------------------------------------------------
+    // 애니메이션에 활용할 캐릭터 상태 확인용
+    [HideInInspector] public bool isWalking; // 걷는 중
+    [HideInInspector] public bool isJumping; // 점프 중
+    [HideInInspector] public bool isCharging; // 기 모으는 중
+    //---------------------------------------------------------
 
     [Header("캐릭터 이동속도")]
     [SerializeField]private float speed = 5f; // 기본 속도 값
@@ -21,8 +29,8 @@ public class CharMove : MonoBehaviour
 
     [Header("지면 감지 레이어")]
     [SerializeField]  private LayerMask groundLayer; // 감지할 땅의 레이어, 인스펙터 창에서 레이어 마스크를 Ground으로 설정
-    // 위 방식에서 [SerializeField]를 사용하지 않고 오로지 c코드로 사용하는 방법
-    // 1. [SerializeField]를 지우고 Awake에서 groundLayer = LayerMask.GetMask("Ground");을 사용
+    // 아래 주석은 위 방식에서 [SerializeField]를 사용하지 않고 오로지 c코드로 사용하는 방법
+    // [SerializeField]를 지우고 Awake에서 groundLayer = LayerMask.GetMask("Ground");을 사용
     // 또 다른 방법이 있지만 2진수 계산방식(비트 시트)를 활용하는거라 이 부분은 제외 단, 이 방법은 가벼운 방식으로 활용됨(최적화, 하지만 가독성 떨어짐) 
 
     //레이 캐스트를 위한 변수
@@ -49,7 +57,7 @@ public class CharMove : MonoBehaviour
     private void Awake()
     {
         charRb = GetComponent<Rigidbody2D>();
-
+        spriteRenderer = GetComponent<SpriteRenderer>();
         // 같은 오브젝트(또는 캐릭터)에 붙어있는 TumblerOfShasha 스크립트 컴포넌트를 가져온다
         // tumblerScript = GetComponent<TumblerOfShasha>();
 
@@ -62,34 +70,58 @@ public class CharMove : MonoBehaviour
 
     private void Update()
     {
+
         Move(); // 기본 조작키
-        //RaycastHit(); //레이캐스트 히트
+        
         BoxCastHit(); // 박스 레이캐스트
         
-
         Jump(); // 점프 함수
+
+        //RaycastHit(); //레이캐스트 히트(사용안함)
     }
 
     private void Move()
     {
         char_X = Input.GetAxisRaw("Horizontal");
 
+        // 좌우 바라보는 방향 처리 (점프 중이든 땅에 있든 항상 적용됨!)
+        if (char_X < 0)
+        {
+            spriteRenderer.flipX = true;  // 왼쪽 이동 시 이미지 반전
+        }
+        else if (char_X > 0)
+        {
+            spriteRenderer.flipX = false; // 오른쪽 이동 시 원래대로
+        }
+
         if (isGrounded) // 공중에서 좌우로 움직이는 것을 방지
         {
+            isJumping = false; // 땅에 있을 땐 점프 중이 않음
+
             if (Input.GetKey(KeyCode.Space)) //스페이스바를 꾹 누르고 있다면...(기를 모으는 중이라면)
             {
                 charRb.velocity = new Vector2(0f, charRb.velocity.y); // 발을 땅에 고정시키기
+                isWalking = false;
+                isCharging = true;
             }
             else
             {
-                // 스페이스바를 안누르고 평지에 있을 때는 기본 속도
-                charRb.velocity = new Vector2(char_X * speed, charRb.velocity.y);
-            }
-           
-        }
-        
-    }
+                
+                charRb.velocity = new Vector2(char_X * speed, charRb.velocity.y); // 스페이스바를 안누르고 평지에 있을 때는 기본 속도
 
+                isWalking = (char_X != 0); // 방향키를 누르고 있으면 isWalking = true
+            }
+
+        }
+        else
+        {
+            // 공중에 있을 때
+            isWalking = false;
+            isCharging = false;
+            isJumping = true;
+
+        }
+    }
     private void Jump() // 캐릭터 점프
     {
         if (isGrounded)
@@ -170,8 +202,7 @@ public class CharMove : MonoBehaviour
                 //-----------------------------------------------
 
                 // 키워드: ForceMode2D.Impulse (순간적인 충격량 부여)
-                // 리지드바디에게 (방향 * 모은 힘) 만큼의 속도를 순간적으로 팍 밀어 넣어 날린다
-                Vector2 finalJumpForce = new Vector2(force_X, force_Y);
+                Vector2 finalJumpForce = new Vector2(force_X, force_Y); // 리지드바디에게 (방향 * 모은 힘) 만큼의 속도를 순간적으로 팍 밀어 넣어 날린다
 
                 // [핵심 해결 코드] 점프 직전에 현재 남아있는 Y축(상하) 물리 속도를 완전히 0으로 소거!
                 charRb.velocity = new Vector2(charRb.velocity.x, 0f);
@@ -190,7 +221,7 @@ public class CharMove : MonoBehaviour
     }
 
 
-    
+    #region (사용 안함) 레이캐스트 히트
     // 키워드 : Physics2D.Raycast(시작위치, 방향, 길이, 필터링할 레이어(감지되는 레이어))
     // 키워드 : Debug.DrawRay(시작위치, 방향 * 길이, 눈으로 확인하기 위한 표시 될 색상)
     private void RaycastHit() //레이캐스트를 활용해서 캐릭터가 지면에 있는지 검사하는 용도
@@ -211,7 +242,7 @@ public class CharMove : MonoBehaviour
         }
 
     }
-    
+    #endregion
 
     // 키워드 : Physics2D.BoxCast(시작 위치 중심, 가로세로 크기, 회전 각도, 박스의 가리키는 방향, 감지 거리, 감지 대상 레이어)
     private void BoxCastHit() //레이캐스트의 단점을 보완하기 위한 박스캐스트히트 함수
@@ -234,14 +265,12 @@ public class CharMove : MonoBehaviour
     // 유니티 에디터 Scene 뷰에서 감지 영역을 눈으로 확인하기 위한 디버깅 함수
     private void OnDrawGizmos() // 개발자 전용 도구 함수(이벤트 콜백 함수)로 Update에 안넣어도 된다.
     {
-        // Gizmos 색상을 빨간색으로 설정
-        Gizmos.color = Color.red;
+        
+        Gizmos.color = Color.red; // Gizmos 색상을 빨간색으로 설정
+        
+        Vector3 boxPosition = transform.position + (Vector3.down * boxCastDistance); // BoxCast가 실제로 검사하게 될 최하단 위치 계산
 
-        // BoxCast가 실제로 검사하게 될 최하단 위치 계산
-        Vector3 boxPosition = transform.position + (Vector3.down * boxCastDistance);
-
-        // 해당 위치에 가상의 와이어 프레임(선으로 된 상자)을 그림
-        Gizmos.DrawWireCube(boxPosition, new Vector3(boxSize.x, boxSize.y, 0f));
+        Gizmos.DrawWireCube(boxPosition, new Vector3(boxSize.x, boxSize.y, 0f)); // 해당 위치에 가상의 와이어 프레임(선으로 된 상자)을 그림
     }
     
 }
