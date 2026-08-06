@@ -71,77 +71,37 @@ public class CharMove : MonoBehaviour
     private void Update()
     {
 
+        CheckGrounded(); // 지면 감지용 박스 레이캐스트
+
         Move(); // 기본 조작키
-        
-        BoxCastHit(); // 박스 레이캐스트
-        
-        Jump(); // 점프 함수
 
         //RaycastHit(); //레이캐스트 히트(사용안함)
     }
 
+    
     private void Move()
     {
-        char_X = Input.GetAxisRaw("Horizontal");
-
-        // 좌우 바라보는 방향 처리 (점프 중이든 땅에 있든 항상 적용됨!)
-        if (char_X < 0)
-        {
-            spriteRenderer.flipX = true;  // 왼쪽 이동 시 이미지 반전
-        }
-        else if (char_X > 0)
-        {
-            spriteRenderer.flipX = false; // 오른쪽 이동 시 원래대로
-        }
+        char_X = Input.GetAxisRaw("Horizontal"); // 유니티에서 제공되는 기본 움직임
 
         if (isGrounded) // 공중에서 좌우로 움직이는 것을 방지
         {
-            isJumping = false; // 땅에 있을 땐 점프 중이 않음
 
             if (Input.GetKey(KeyCode.Space)) //스페이스바를 꾹 누르고 있다면...(기를 모으는 중이라면)
             {
-                charRb.velocity = new Vector2(0f, charRb.velocity.y); // 발을 땅에 고정시키기
                 isWalking = false;
                 isCharging = true;
-            }
-            else
-            {
-                
-                charRb.velocity = new Vector2(char_X * speed, charRb.velocity.y); // 스페이스바를 안누르고 평지에 있을 때는 기본 속도
 
-                isWalking = (char_X != 0); // 방향키를 누르고 있으면 isWalking = true
-            }
+                charRb.velocity = new Vector2(0f, charRb.velocity.y); // 발을 땅에 고정시키기
 
-        }
-        else
-        {
-            // 공중에 있을 때
-            isWalking = false;
-            isCharging = false;
-            isJumping = true;
-
-        }
-    }
-    private void Jump() // 캐릭터 점프
-    {
-        if (isGrounded)
-        {
-            if (Input.GetKeyDown(KeyCode.Space)) // 누르는 순간 딱 한번 실행
-            {
-                jumpForce = 0f; // 점프 시작할 때 점프 힘 게이지 초기화
-                //Debug.Log("점프 기 모으기");
-            }
-
-            if (Input.GetKey(KeyCode.Space)) // 꾹 누르고 있는 상황(매 프레임)
-            {
                 jumpForce += chargeSpeed * Time.deltaTime; // 매 프레임에 속도를 추가한다.
-
                 jumpForce = Mathf.Min(jumpForce, maxJumpForce); // 점프 게이지의 최대치 제한하기 해당 키워드는 둘 중에 가장 작은 값을 출력
-                //Debug.Log("점프 게이지 모으는 중 " + jumpForce);
-            }
+                Debug.Log("점프 게이지 모으는 중 " + jumpForce);
 
-            if (Input.GetKeyUp(KeyCode.Space)) // 키를 땐 순간(점프 순간)
+            }
+            else if(Input.GetKeyUp(KeyCode.Space)) // 스페이스바를 때는 순간 점프 실행하게끔
             {
+                Jump();
+
                 #region (사용안함) 단순 normalized 사용기법 [문제점: 좌우 점프와 제자리 점프의 힘이 다르게 작용]
 
                 /*
@@ -175,49 +135,75 @@ public class CharMove : MonoBehaviour
                 //charRb.AddForce(jumpDirection * finalForce, ForceMode2D.Impulse);
                 #endregion
 
-
-                // 점프의 힘 보정해주는 변수(좌우 점프와 제자리 점프 보정)
-                //방향 벡터를 하나로 묶어 정규화(.normalized)하지 않고, 힘을 각각 계산
-                float force_Y = jumpForce; // 위로 솟구치는 힘은 언제나 100 % 고정
-
-                // 좌우 힘은 방향(char_X)에 힘을 곱하되, 밸런스를 위해 가로 계수(0.7f)를 곱해 조율
-                float force_X = char_X * jumpForce * 0.7f;
-
-                //-----------------------------------------------
-                //돌발행동을 한다면...
-                // 텀블러 스크립트에서 가져온다.
-                if (tumblerScript != null) // 텀블러 스크립트가 제대로 연결되어 있다면 배율을 가져와서 곱한다.
+            }
+            else // 평범하게 걷고 있다면
+            {
+               
+                if (char_X < 0)  // 좌우 바라보는 방향 처리 (걷고 있을 때만 처리)
                 {
-                    float multiplier = tumblerScript.Outburst();
-                    force_Y *= multiplier;
-                    force_X *= multiplier;
-
-                    // 디버그로 힘이 어떻게 변했는지 확인해보세요!
-                    //if (multiplier !=1.0f) // 1.0f인 이유는 텀블러 스크립트에서 1.0f이 출력된다는 것은 힘 배율이 변화없다는 뜻이다. 
-                    //{
-                    //    Debug.Log("최종 적용된 점프 힘 배율: " + (multiplier).ToString("F1") + "배");
-                    //}
-                    
+                    spriteRenderer.flipX = true;  // 왼쪽 이동 시 이미지 반전
                 }
-                //-----------------------------------------------
+                else if (char_X > 0)
+                {
+                    spriteRenderer.flipX = false; // 오른쪽 이동 시 원래대로
+                }
 
-                // 키워드: ForceMode2D.Impulse (순간적인 충격량 부여)
-                Vector2 finalJumpForce = new Vector2(force_X, force_Y); // 리지드바디에게 (방향 * 모은 힘) 만큼의 속도를 순간적으로 팍 밀어 넣어 날린다
+                isCharging = false;
+                isWalking = (char_X != 0);
 
-                // [핵심 해결 코드] 점프 직전에 현재 남아있는 Y축(상하) 물리 속도를 완전히 0으로 소거!
-                charRb.velocity = new Vector2(charRb.velocity.x, 0f);
+                charRb.velocity = new Vector2(char_X * speed, charRb.velocity.y);
+                jumpForce = 0f; // 걷는 중에는 점프 게이지 확실히 초기화
 
-                charRb.AddForce(finalJumpForce, ForceMode2D.Impulse);
-
-                //Debug.Log("최종 점프 힘: " + finalJumpForce);
-
-                isGrounded = false;
-
-                // 중요: 날아간 직후 모았던 힘은 다시 0으로 깨끗하게 초기화
-                jumpForce = 0f;
-                
             }
         }
+        else // 공중에 있을 때
+        {
+            isWalking = false;
+            isCharging = false;
+            isJumping = true;
+
+            // 공중에서는 AddForce나 속도 제어를 하지 않아 한 번 뛴 궤적을 바꿀 수 없게(점프킹 특성) 만든다
+        }
+
+    }
+
+    private void Jump() // 캐릭터 점프
+    {
+        // 점프의 힘 보정해주는 변수(좌우 점프와 제자리 점프 보정)
+        //방향 벡터를 하나로 묶어 정규화(.normalized)하지 않고, 힘을 각각 계산
+        float force_Y = jumpForce; // 위로 솟구치는 힘은 언제나 100 % 고정
+
+        // 좌우 힘은 방향(char_X)에 힘을 곱하되, 밸런스를 위해 가로 계수(0.7f)를 곱해 조율
+        float force_X = char_X * jumpForce * 0.7f;
+
+        //-----------------------------------------------
+        //돌발행동을 한다면...
+        // 텀블러 스크립트에서 가져온다.
+        if (tumblerScript != null) // 텀블러 스크립트가 제대로 연결되어 있다면 배율을 가져와서 곱한다.
+        {
+            float multiplier = tumblerScript.Outburst();
+            force_Y *= multiplier;
+            force_X *= multiplier;
+
+            //    Debug.Log("최종 적용된 점프 힘 배율: " + (multiplier).ToString("F1") + "배");
+            //}
+
+            //-----------------------------------------------
+
+            //Vector2 finalJumpForce = new Vector2(force_X, force_Y); // 리지드바디에게 (방향 * 모은 힘) 만큼의 속도를 순간적으로 팍 밀어 넣어 날린다
+
+            // 키워드: ForceMode2D.Impulse (순간적인 충격량 부여)
+            //charRb.AddForce(finalJumpForce, ForceMode2D.Impulse);
+
+            //Debug.Log("최종 점프 힘: " + finalJumpForce);
+        }
+        charRb.velocity = new Vector2(force_X, force_Y);
+
+        isGrounded = false;
+        isJumping = true;
+        isCharging = false;
+        jumpForce = 0f; // 점프 직후 게이지 비우기
+
     }
 
 
@@ -245,19 +231,18 @@ public class CharMove : MonoBehaviour
     #endregion
 
     // 키워드 : Physics2D.BoxCast(시작 위치 중심, 가로세로 크기, 회전 각도, 박스의 가리키는 방향, 감지 거리, 감지 대상 레이어)
-    private void BoxCastHit() //레이캐스트의 단점을 보완하기 위한 박스캐스트히트 함수
+    private void CheckGrounded() //땅을 인식하는 함수 레이캐스트의 단점을 보완하기 위한 박스캐스트히트 함수
     {
         RaycastHit2D hit = Physics2D.BoxCast(transform.position, boxSize, 0f, Vector2.down, boxCastDistance, groundLayer);
+        
+        bool wasGrounded = isGrounded; // 이전 프레임의 상태 저장
+        isGrounded = (hit.collider != null);
 
-        if (hit.collider != null)
+        // 막 공중에서 땅으로 착지한 순간 (안정성을 위해 힘 초기화)
+        if (isGrounded && !wasGrounded)
         {
-            isGrounded = true;
-            //Debug.Log("땅에 닫고 있습니다. " + isGrounded);
-        }
-        else
-        {
-            isGrounded = false;
-            //Debug.Log("땅에 안 닫고 있습니다. " + isGrounded);
+            isJumping = false;
+            jumpForce = 0f;
         }
     }
 
