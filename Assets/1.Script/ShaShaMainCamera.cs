@@ -16,7 +16,7 @@ public class ShaShaMainCamera : MonoBehaviour
 
     private void Awake()
     {
-        
+        currentCam_Y = transform.position.y;
     }
 
     private void Update()

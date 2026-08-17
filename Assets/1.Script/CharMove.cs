@@ -54,6 +54,11 @@ public class CharMove : MonoBehaviour
     //TumblerOfShasha 스크립트 변수
     [SerializeField] private TumblerOfShasha tumblerScript;
 
+    /// <summary>
+    /// 점프 직후 지면 감지 쿨타임용 변수 추가
+    /// </summary>
+    private float jumpGroundIgnoreTimer = 0f;
+
     private void Awake()
     {
         charRb = GetComponent<Rigidbody2D>();
@@ -71,7 +76,17 @@ public class CharMove : MonoBehaviour
     private void Update()
     {
 
-        CheckGrounded(); // 지면 감지용 박스 레이캐스트
+        // 타이머 차감
+        if (jumpGroundIgnoreTimer > 0f)
+        {
+            jumpGroundIgnoreTimer -= Time.deltaTime;
+            isGrounded = false; // 쿨타임 중에는 무조건 공중 상태 유지
+        }
+        else
+        {
+            CheckGrounded(); // 쿨타임이 끝났을 때만 지면 감지, 지면 감지용 박스 레이캐스트
+        }
+        
 
         Move(); // 기본 조작키
 
@@ -199,6 +214,7 @@ public class CharMove : MonoBehaviour
         }
         charRb.velocity = new Vector2(force_X, force_Y);
 
+        jumpGroundIgnoreTimer = 0.15f; //점프 직후 0.15초 동안은 CheckGrounded()가 지면을 감지하지 못하게 막음
         isGrounded = false;
         isJumping = true;
         isCharging = false;
