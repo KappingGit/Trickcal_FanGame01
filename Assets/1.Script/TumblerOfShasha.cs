@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
-
+using System; //이걸 사용함으로 Random와 라이브러이 충돌이 생겨서 아래처럼 바꿔준다. 이래야 Random에 문제가 안생긴다.
+using Random = UnityEngine.Random;  // "이 스크립트에서 Random은 유니티 Random을 의미한다!" 이거 엄청 중요!!!!!!!
+//using JetBrains.Annotations;
 
 //샤샤 텀블러의 [돌발행동] 시스템
-// 플레이어가 점프를 하다 보면 [돌발행동] 확률이 랜덤으로 증가되며 
-
-
+// 플레이어가 점프를 하다 보면 [돌발행동] 확률이 랜덤으로 증가되며 100%에 도달하게 되면 작동된다. 
 public class TumblerOfShasha : MonoBehaviour
 {
 
@@ -17,17 +17,26 @@ public class TumblerOfShasha : MonoBehaviour
     [HideInInspector] public float currentGauge = 0.0f; // 시작 확률 및 현재 확률, public으로 해서 UI에 사용하기
 
     [Header("게이지 % 범위 설정 : n%")]
-    [SerializeField] private float addGaugeMin = 5f; // 5라고 쓰면 추가될 최소 확률(+5%)라는 의미
+    [SerializeField] private float addGaugeMin = 2f; // 5라고 쓰면 추가될 최소 확률(+5%)라는 의미
     [SerializeField] private float addGaugeMax = 15f; //  15라고 쓰면 추가될 최대 확률 (+15%)라는 의미
 
     [Header("돌발행동 힘 배율 범위 : n배")] // Multiplier = 증가시킨다라는 뜻
-    [SerializeField] private float minOutburstMult = 1f; // 최소 힘 1f = 1배
+    [SerializeField] private float minOutburstMult = 0.8f; // 최소 힘 1f = 1배
     [SerializeField] private float maxOutburstMult = 2f; // 최대 힘 2f = 2배
 
+    /// <summary>
+    /// [돌발행동]을 한다는 것을 알기위한 용도(가독성)
+    /// </summary>
+    //public bool IsOutburst { get; private set; }// 프로퍼티는 외부에서 IsOutburst를 읽을순 있지만 값을 바꾸는 행위는 "여기" 스크립트에서 밖에 못한다.
+
+    /// <summary>
+    /// 이벤트 시스템을 활용해본다.(가독성을 위해) 끄아아아아아
+    /// </summary>
+    public event Action<float> OnOutburstTriggered; // 돌발행동이 터졌음을 외부에 알리는 신호(이벤트) 선언
 
     public float Outburst()
     {
-        // 중요!!! 인스펙터의 퍼센트(%) 수치를 계산용 수치(0.0~1.0)로 변환 (가독성을 위함)
+        // 엄청 중요!!! 인스펙터의 퍼센트(%) 수치를 계산용 수치(0.0~1.0)로 변환 (가독성을 위함)
         float addMin = addGaugeMin / 100f; // 2% -> 0.02
         float addMax = addGaugeMax / 100f; // 10% -> 0.10
 
@@ -72,21 +81,28 @@ public class TumblerOfShasha : MonoBehaviour
 
         if (currentGauge >= 1.0f) // 현재 확률이 1.0 = 100%가 되가 넘을 때 발동
         {
+            //IsOutburst = true; // 일단 사용안하고 있음
+
             // 93%에서 10%가 더해져 103%가 된 그 순간! 돌발행동이 터집니다.
             float randomMultiplier = Random.Range(minOutburstMult, maxOutburstMult);
+
+            // [핵심] "돌발행동 터졌다!"라고 신호를 방송합니다.
+            OnOutburstTriggered?.Invoke(randomMultiplier); // 이벤트 시스템: 추가 공부 필요!!!!!
 
             Debug.Log("[돌발행동] 발동! (게이지 초기화), 힘 배율 : " + (randomMultiplier).ToString("F1") + "배");
 
             // 발동되었으니 게이지를 다시 0으로 초기화합니다.
             currentGauge = 0.0f;
-
             return randomMultiplier;
         }
         else
         {
-
-
+            
+            //IsOutburst = false; // 일단 사용안하고 있음
             return 1.0f; // 돌발행동이 생기지 않음, 1.0으로 하는 이유는 힘이 추가로 받지 않는 일반 점프임으로 1.0을 곱해 힘 배율이 변화없게끔 설정
         }
+
+        
+
     }
 }

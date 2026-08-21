@@ -41,7 +41,7 @@ public class CharMove : MonoBehaviour
     [Header("점프 설정")] // 헤더 방식으로 인스펙터 창의 가독성을 높임
     private float jumpForce = 0f; // 현재 모인 점프 힘(점프 키를 누르는 시간 경과에 따른 힘)
     private float maxJumpForce = 14f; // 최대 힘 제한(무한정으로 힘을 누적하는 것을 방지)
-    private float chargeSpeed = 18f; // 점프 힘이 모이는 속도(게이지가 얼마나 차오르는지 결정하는 변수)
+    private float chargeSpeed = 14f; // 점프 힘이 모이는 속도(게이지가 얼마나 차오르는지 결정하는 변수)
 
     [Header("박스 캐스트 설정")]
     // 박스 캐스트를 위한 변수
