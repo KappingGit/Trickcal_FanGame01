@@ -18,13 +18,14 @@ public class UI_Script : MonoBehaviour
 
     private void Update()
     {
-        if (Time.timeScale == 0f) return;
-
+        
         // ESC 키를 누르면 일시정지 상태를 전환한다.
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             TogglePause();
         }
+
+        if (Time.timeScale == 0f) return; // 이거의 위치에 따라 esc기능이 조금 달라짐
     }
 
     

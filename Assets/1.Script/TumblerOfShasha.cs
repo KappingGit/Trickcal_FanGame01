@@ -24,6 +24,12 @@ public class TumblerOfShasha : MonoBehaviour
     [SerializeField] private float minOutburstMult = 0.8f; // 최소 힘 1f = 1배
     [SerializeField] private float maxOutburstMult = 2f; // 최대 힘 2f = 2배
 
+    //---------------------------------------------------------
+    [Header("텀블러의 돌발행동 사운드 설정")]
+    [SerializeField][Tooltip("플레이어의 AudioSource 컴포넌트 넣기")] private AudioSource sfxAudioSource; // 스피커 컴포넌트 (동일한 스피커 써도 됨)
+    [SerializeField][Tooltip("돌발행동 관련 음성 집어넣기")]private AudioClip outburstSound;        // 돌발행동 소리 파일
+    //---------------------------------------------------------
+
     /// <summary>
     /// [돌발행동]을 한다는 것을 알기위한 용도(가독성)
     /// </summary>
@@ -88,6 +94,12 @@ public class TumblerOfShasha : MonoBehaviour
 
             // [핵심] "돌발행동 터졌다!"라고 신호를 방송합니다.
             OnOutburstTriggered?.Invoke(randomMultiplier); // 이벤트 시스템: 추가 공부 필요!!!!!
+
+            // [사운드 추가] 돌발행동 효과음 재생!
+            if (sfxAudioSource != null && outburstSound != null)
+            {
+                sfxAudioSource.PlayOneShot(outburstSound);
+            }
 
             Debug.Log("[돌발행동] 발동! (게이지 초기화), 힘 배율 : " + (randomMultiplier).ToString("F1") + "배");
 

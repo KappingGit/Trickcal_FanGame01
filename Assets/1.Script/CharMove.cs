@@ -21,6 +21,7 @@ public class CharMove : MonoBehaviour
     [HideInInspector] public bool isCharging; // 기 모으는 중
     //---------------------------------------------------------
 
+
     [Header("캐릭터 이동속도")]
     [SerializeField]private float speed = 5f; // 기본 속도 값
 
@@ -53,6 +54,13 @@ public class CharMove : MonoBehaviour
     [Header("TumblerOfShasha 스크립트")]
     //TumblerOfShasha 스크립트 변수
     [SerializeField] private TumblerOfShasha tumblerScript;
+
+
+    //---------------------------------------------------------
+    [Header("점프 사운드 설정")]
+    [SerializeField][Tooltip("플레이어의 AudioSource 컴포넌트 넣기")] private AudioSource sfxAudioSource; // 캐릭터 스피커 컴포넌트
+    [SerializeField][Tooltip("점프 사운드 넣기")] private AudioClip jumpSound;        // 점프 소리 파일
+    //---------------------------------------------------------
 
     /// <summary>
     /// 점프 직후 지면 감지 쿨타임용 변수 추가
@@ -213,6 +221,13 @@ public class CharMove : MonoBehaviour
             //Debug.Log("최종 점프 힘: " + finalJumpForce);
         }
         charRb.velocity = new Vector2(force_X, force_Y);
+
+        // [사운드 추가] 점프 효과음 재생
+        if (sfxAudioSource != null && jumpSound != null)
+        {
+            // Play() 대신 PlayOneShot()을 사용하는 이유는 점프 소리가 짧게 연달아 나더라도 기존 소리가 뚝 끊기지 않고 자연스럽게 겹쳐서 끝까지 재생되기 때문
+            sfxAudioSource.PlayOneShot(jumpSound); 
+        }
 
         jumpGroundIgnoreTimer = 0.15f; //점프 직후 0.15초 동안은 CheckGrounded()가 지면을 감지하지 못하게 막음
         isGrounded = false;
