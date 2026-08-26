@@ -11,6 +11,19 @@ public class UI_Script : MonoBehaviour
 
     [SerializeField] private GameObject OptionUI_Obj;
 
+    //나중에 사운드 전용 스크립트로 옮길수 있으니 여기로 배치
+    [Header("배경 음악 연결 요소")]
+    [SerializeField] private AudioSource bgmAudioSource; // BGM 스피커
+    [SerializeField] private Slider bgmSlider;          // 볼륨 조절 슬라이더 UI
+
+    [Header("점프 사운드 연결 요소")]
+    [SerializeField] private AudioSource jumpAudioSource; // 점프 오디오 소스
+    [SerializeField] private Slider jumpSlider;          // 볼륨 조절 슬라이더 UI
+
+    [Header("텀블러 사운드 연결 요소")]
+    [SerializeField] private AudioSource outburstAudioSource; // 텀블러 오디오 소스
+    [SerializeField] private Slider outbursSlider;          // 볼륨 조절 슬라이더 UI
+
     private bool isPaused = false; // 일시정지 중이라면
 
     private bool isOption = false;
@@ -25,6 +38,16 @@ public class UI_Script : MonoBehaviour
         if (bgmAudioSource != null && bgmSlider != null)
         {
             bgmSlider.value = bgmAudioSource.volume;
+        }
+
+        if (jumpAudioSource != null && jumpSlider != null)
+        {
+            jumpSlider.value = jumpAudioSource.volume;
+        }
+
+        if (outburstAudioSource != null && outbursSlider != null)
+        {
+            outbursSlider.value = outburstAudioSource.volume;
         }
     }
 
@@ -90,10 +113,7 @@ public class UI_Script : MonoBehaviour
 
     }
 
-    //나중에 사운드 전용 스크립트로 옮길수 있으니 여기로 배치
-    [Header("연결 요소")]
-    [SerializeField] private AudioSource bgmAudioSource; // BGM 스피커
-    [SerializeField] private Slider bgmSlider;          // 볼륨 조절 슬라이더 UI
+   
 
     // 슬라이더가 움직일 때 실시간으로 호출될 볼륨 조절 함수
     // 매개변수로 float volume을 받는 것이 핵심
@@ -105,5 +125,21 @@ public class UI_Script : MonoBehaviour
             bgmAudioSource.volume = volume; // 0.0 ~ 1.0 조절
         }
     }
-    
+
+    public void Jump_Sound(float volume)
+    {
+        if (jumpAudioSource != null)
+        {
+            jumpAudioSource.volume = volume; // 0.0 ~ 1.0 조절
+        }
+    }
+
+    public void Outburst_Sound(float volume)
+    {
+        if (outburstAudioSource != null)
+        {
+            outburstAudioSource.volume = volume; // 0.0 ~ 1.0 조절
+        }
+    }
+
 }
